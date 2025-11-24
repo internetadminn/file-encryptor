@@ -1,1 +1,7 @@
 node_modules
+test-results/
+playwright-report/
+blob-report/
+tests/temp_*
+.DS_Store
+npm-debug.log
