@@ -1,7 +1,4 @@
-/**
- * Клас, що відповідає за криптографічну логіку та роботу з файлами.
- * Не знає нічого про HTML, тільки приймає дані і повертає результат.
- */
+
 class CryptoService {
   constructor() {
     this.algoName = "AES-GCM";
@@ -11,7 +8,7 @@ class CryptoService {
     this.iter = 100000;
   }
 
-  // Читання файлу у бінарний вигляд
+
   readFileAsArrayBuffer(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -21,7 +18,7 @@ class CryptoService {
     });
   }
 
-  // Генерація ключа з пароля (PBKDF2)
+
   async generateKey(password, salt) {
     const enc = new TextEncoder();
     const passwordMaterial = await window.crypto.subtle.importKey(
@@ -46,7 +43,7 @@ class CryptoService {
     );
   }
 
-  // Метод шифрування
+
   async encryptProcess(file, password) {
     const fileBuffer = await this.readFileAsArrayBuffer(file);
     const salt = window.crypto.getRandomValues(new Uint8Array(this.saltLen));
@@ -60,17 +57,17 @@ class CryptoService {
       fileBuffer
     );
 
-    // Повертаємо Blob з структурою: Salt + IV + Data
+
     return new Blob([salt, iv, encryptedData], {
       type: "application/octet-stream",
     });
   }
 
-  // Метод дешифрування
+
   async decryptProcess(file, password) {
     const fileBuffer = await this.readFileAsArrayBuffer(file);
 
-    // Розбір файлу
+  
     const salt = fileBuffer.slice(0, 16);
     const iv = fileBuffer.slice(16, 28);
     const encryptedData = fileBuffer.slice(28);
@@ -86,7 +83,7 @@ class CryptoService {
     return new Blob([decryptedData]);
   }
 
-  // Збереження файлу на диск
+
   saveFileToDisk(blob, fileName) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -99,20 +96,16 @@ class CryptoService {
   }
 }
 
-/**
- * Клас, що керує Інтерфейсом (UI).
- * Знаходить кнопки, вішає події, показує повідомлення.
- */
+
 class UIManager {
   constructor(cryptoService) {
-    this.cryptoService = cryptoService; // Зв'язок з логікою
+    this.cryptoService = cryptoService; 
 
-    // Елементи DOM
     this.tabs = document.querySelectorAll(".tab-link");
     this.contents = document.querySelectorAll(".tab-content");
     this.statusMsg = document.getElementById("status-message");
 
-    // Inputs
+
     this.encFile = document.getElementById("encrypt-file");
     this.encPass = document.getElementById("encrypt-password");
     this.encBtn = document.getElementById("encrypt-button");
@@ -125,7 +118,7 @@ class UIManager {
   }
 
   init() {
-    // Налаштування вкладок
+
     this.tabs.forEach((link) => {
       link.addEventListener("click", (e) => {
         const tabId = e.target.getAttribute("onclick").match(/'(.*?)'/)[1];
@@ -134,8 +127,6 @@ class UIManager {
     });
     this.switchTab("encrypt");
 
-    // Слухачі кнопок
-    // Використовуємо стрілкові функції, щоб зберегти контекст `this`
     if (this.encBtn) {
       this.encBtn.addEventListener("click", () => this.handleEncrypt());
     }
@@ -162,10 +153,10 @@ class UIManager {
 
     this.statusMsg.style.display = "block";
     this.statusMsg.textContent = msg;
-    this.statusMsg.className = "status"; // скидання класів
+    this.statusMsg.className = "status";
 
     if (isLoading) {
-      this.statusMsg.classList.add("success"); // Можна додати окремий стиль loading
+      this.statusMsg.classList.add("success"); 
     } else if (isError) {
       this.statusMsg.classList.add("error");
     } else {
@@ -173,7 +164,7 @@ class UIManager {
     }
   }
 
-  // Обробник натискання "Зашифрувати"
+
   async handleEncrypt() {
     try {
       const file = this.encFile.files[0];
@@ -185,7 +176,7 @@ class UIManager {
 
       this.showStatus("Шифрування... Це може зайняти деякий час.", false, true);
 
-      // Виклик логіки
+
       const blob = await this.cryptoService.encryptProcess(file, pass);
 
       this.cryptoService.saveFileToDisk(blob, file.name + ".encrypted");
@@ -197,7 +188,7 @@ class UIManager {
     }
   }
 
-  // Обробник натискання "Розшифрувати"
+
   async handleDecrypt() {
     try {
       const file = this.decFile.files[0];
@@ -213,7 +204,7 @@ class UIManager {
         true
       );
 
-      // Виклик логіки
+
       const blob = await this.cryptoService.decryptProcess(file, pass);
 
       const originalName = file.name.replace(/\.encrypted$/, "");
@@ -228,7 +219,7 @@ class UIManager {
   }
 }
 
-// Запуск програми
+
 document.addEventListener("DOMContentLoaded", () => {
   const cryptoService = new CryptoService();
   new UIManager(cryptoService);
